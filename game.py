@@ -36,6 +36,9 @@ def is_movement_allowed(board, mov, pawn: Pawn):
             if abs(mov[0]) <= abs(allowed_mov[0]) and abs(mov[1]) <= abs(allowed_mov[1]):
                 return True
     
-    
+    if type == PawnType.FOU:
+        for allowed_mov in type[2]:
+            if abs(mov[0]) <= abs(allowed_mov[0]) and abs(mov[1]) <= abs(allowed_mov[1]):
+                return True
 
     return False
