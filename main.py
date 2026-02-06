@@ -1,9 +1,11 @@
 
 
 from color import Color
+from game import play_round
 from pawn import Pawn
 from pawn_type import PawnType
 from display import display_board
+from player import Player
 
 def init_board():
     board = [
@@ -21,4 +23,15 @@ def init_board():
 
 if __name__ == "__main__":
     board = init_board()
-    print(display_board(board))
+
+    player_white = Player(board, Color.BLANC)
+    player_black = Player(board, Color.NOIR)
+
+    current_player = player_white
+    round_count = 1
+    
+    while True:
+        # TODO: Check win condition
+        play_round(board, current_player, round_count)
+        round_count += 1
+        current_player = player_black if current_player.color == Color.BLANC else player_white
