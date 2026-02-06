@@ -55,7 +55,8 @@ class Player:
         print("Valid chess move")
 
         # Move the piece
-
+        self.board[end_row][end_col] = start_pawn
+        self.board[start_row][start_col] = None
 
 
 
