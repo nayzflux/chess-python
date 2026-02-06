@@ -52,7 +52,18 @@ class Player:
             print("Move not allowed for this piece")
             return False
         
+        # Check for piece in the way
+        if end_pawn.color == self.color:
+            # TODO: ROCK handle
+            print("You cannot take your own piece")
+            return False
+        
         print("Valid chess move")
+        
+        # Take opponent piece if there is one
+        if end_pawn is not None and end_pawn.color != self.color:
+            print("You take an opponent piece")
+            # TODO: Handle piece taking (remove from board, add to taken pieces list, add points)
 
         # Move the piece
         start_pawn.set_has_moved(True)
