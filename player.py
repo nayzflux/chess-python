@@ -25,35 +25,37 @@ class Player:
 
         if not re.fullmatch(pattern, move):
             print("Invalid format, please use the format 'a2-a3' or 'A2-A3'")
-            return False
+            return
 
         print("Valid move format")
+        
         # Convertir la notation en indices
         start_col = board_square[move[0]]
         start_row = board_square[move[1]]
         end_col = board_square[move[3]]
         end_row = board_square[move[4]]
 
-        start = self.board[start_row][start_col]
-        end = self.board[end_row][end_col]
+        start_pawn = self.board[start_row][start_col]
+        end_pawn = self.board[end_row][end_col]
 
-        if start is None:
+        if start_pawn is None:
             print("No piece at starting position")
-            return False
+            return
         
-        if isinstance(start, Pawn) and start.get_color() != self.color:
+        if isinstance(start_pawn, Pawn) and start_pawn.get_color() != self.color:
             print("This is not your piece, you can only play your pieces")
-            return False
-        
+            return
         
         mov = (end_col - start_col, end_row - start_row)
-        
-        if game.is_movement_allowed(self.board, mov, start):
-            print("Valid chess move")
-            return True
-        else:
+
+        if not game.is_movement_allowed(self.board, mov, start_pawn):
             print("Move not allowed for this piece")
-            return False
+            return
+        
+        print("Valid chess move")
+
+        # Move the piece
+
 
 
 
