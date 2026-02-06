@@ -54,4 +54,4 @@ def display_board(board) -> str:
 		lines.append(f" {rank}  | " + " | ".join(cells) + " |")
 	lines.append(sep)
 	lines.append(header_or_footer())
-	return "\n".join(lines)
+	print("\n".join(lines))

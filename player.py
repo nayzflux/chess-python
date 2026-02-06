@@ -4,11 +4,11 @@ import game
 
 board_square = {
     # Files
-    "a": 7, "b": 6, "c": 5, "d": 4, "e": 3, "f": 2, "g": 1, "h": 0,
-    "A": 7, "B": 6, "C": 5, "D": 4, "E": 3, "F": 2, "G": 1, "H": 0,
+    "a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7,
+    "A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7,
 
     # Lines
-    "1": 0, "2": 1, "3": 2, "4": 3,"5": 4, "6": 5, "7": 6, "8": 7
+    "1": 7, "2": 6, "3": 5, "4": 4,"5": 3, "6": 2, "7": 1, "8": 0
 }
 
 class Player:
@@ -25,7 +25,7 @@ class Player:
 
         if not re.fullmatch(pattern, move):
             print("Invalid format, please use the format 'a2-a3' or 'A2-A3'")
-            return
+            return False
 
         print("Valid move format")
         
@@ -40,23 +40,27 @@ class Player:
 
         if start_pawn is None:
             print("No piece at starting position")
-            return
+            return False
         
         if isinstance(start_pawn, Pawn) and start_pawn.get_color() != self.color:
             print("This is not your piece, you can only play your pieces")
-            return
+            return False
         
         mov = (end_col - start_col, end_row - start_row)
 
         if not game.is_movement_allowed(self.board, mov, start_pawn):
             print("Move not allowed for this piece")
-            return
+            return False
         
         print("Valid chess move")
 
         # Move the piece
+        start_pawn.set_has_moved(True)
+
         self.board[end_row][end_col] = start_pawn
         self.board[start_row][start_col] = None
+
+        return True
 
 
 
