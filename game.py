@@ -61,8 +61,8 @@ def play_round(board, player, opponent, round_count):
     else:
         display_points(opponent, player)
         print(f"Au tour de Noir:")
-        
-print("---------------------------------")
+
+    print("---------------------------------")
     
     move = input("Entrez votre coup (ex: d4-e5): ")
 
