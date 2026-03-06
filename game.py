@@ -1,5 +1,5 @@
 from color import Color
-from display import display_board
+from display import display_board, display_points
 from pawn import Pawn
 from pawn_type import PawnType
 
@@ -24,6 +24,10 @@ def is_movement_allowed(board, mov, pawn: Pawn):
             return True
         
     if type == PawnType.ROI:
+        # Check ROCK
+        if (mov == (2, 0) or mov == (-2, 0)) and not pawn.get_has_moved():
+            return True
+
         if mov in type.value[2]:
             return True
     
@@ -48,8 +52,12 @@ def is_movement_allowed(board, mov, pawn: Pawn):
 
     return False
 
-def play_round(board, player, round_count):
+def play_round(board, player, opponent, round_count):
     display_board(board)
+    if player.color == Color.BLANC:
+        display_points(player, opponent)
+    else:
+        display_points(opponent, player)
 
     print("---------------------------------")
     print(f"Au tour de {player.color}:")
@@ -58,4 +66,4 @@ def play_round(board, player, round_count):
     success = player.play(move)
 
     if not success:
-        play_round(board, player, round_count)
+        play_round(board, player, opponent, round_count)
