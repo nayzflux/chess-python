@@ -4,7 +4,7 @@ from pawn import Pawn
 from pawn_type import PawnType
 
 
-def is_movement_allowed(board, mov, pawn: Pawn):
+def is_movement_allowed(board, mov, pawn: Pawn, position):
     type = pawn.get_type()
 
     if type == PawnType.PION:
@@ -39,19 +39,52 @@ def is_movement_allowed(board, mov, pawn: Pawn):
     if type == PawnType.DAME:
         for allowed_mov in type.value[2]:
             if abs(mov[0]) <= abs(allowed_mov[0]) and abs(mov[1]) <= abs(allowed_mov[1]) and (abs(mov[0]) == 0 or abs(mov[1]) == 0 or abs(mov[0]) == abs(mov[1])):
-                return True
+                print(mov)
+                if is_path_clear(board, mov, position, pawn):
+                    return True
+        return False
     
     if type == PawnType.TOUR:
         for allowed_mov in type.value[2]:
             if abs(mov[0]) <= abs(allowed_mov[0]) and abs(mov[1]) <= abs(allowed_mov[1]):
-                return True
+                print(mov)
+                if is_path_clear(board, mov, position, pawn):
+                    return True
+        return False
     
     if type == PawnType.FOU:
         for allowed_mov in type.value[2]:
             if abs(mov[0]) <= abs(allowed_mov[0]) and abs(mov[1]) <= abs(allowed_mov[1]) and abs(mov[0]) == abs(mov[1]):
-                return True
+                print(mov)
+                if is_path_clear(board, mov, position, pawn):
+                    return True
+        return False
 
     return False
+
+
+def is_path_clear(board, mov, position, pawn):
+    # Vérifie si le chemin entre start et end est dégagé
+    
+    start_row, start_col = position
+
+    if pawn.get_type() == PawnType.CAVALIER or pawn.get_type() == PawnType.PION:
+        return True
+    
+    step_col = 0 if mov[0] == 0 else (1 if mov[0] > 0 else -1)
+    step_row = 0 if mov[1] == 0 else (1 if mov[1] > 0 else -1)
+
+    path = [(start_row + i * step_row, start_col + i * step_col) for i in range(1, max(abs(mov[0]), abs(mov[1])))]
+
+    path_list = [board[row][col] for row, col in path]
+
+    print("Path:", path)
+    print("Path list:", path_list)
+    #Return True if all the squares in the path are empty (None)
+    if all(piece is None for piece in path_list):
+        print("Piece on the way")
+    return all(piece is None for piece in path_list)
+
 
 def play_round(board, player, opponent, round_count):
     display_board(board)
@@ -70,3 +103,4 @@ def play_round(board, player, opponent, round_count):
 
     if not success:
         play_round(board, player, opponent, round_count)
+
