@@ -58,7 +58,7 @@ class Player:
         is_en_passant = False
         en_passant_pawn = None
 
-        if not game.is_movement_allowed(self.board, mov, start_pawn):
+        if not game.is_movement_allowed(self.board, mov, start_pawn, position=(start_row, start_col)):
             print("Move not allowed for this piece")
             return False
 
