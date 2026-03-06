@@ -57,11 +57,14 @@ def play_round(board, player, opponent, round_count):
     display_board(board)
     if player.color == Color.BLANC:
         display_points(player, opponent)
+        print("---------------------------------")
+        print(f"Au tour de Blanc:")
     else:
         display_points(opponent, player)
+        print("---------------------------------")
+        print(f"Au tour de Noir:")
 
-    print("---------------------------------")
-    print(f"Au tour de {player.color}:")
+    
     move = input("Entrez votre coup (ex: d4-e5): ")
 
     success = player.play(move)
