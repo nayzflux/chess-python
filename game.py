@@ -12,15 +12,16 @@ def is_movement_allowed(board, mov, pawn: Pawn):
         has_moved = pawn.get_has_moved()
 
         direction = 1 if color == Color.NOIR else -1
-        coefficient = 2 * direction if not has_moved else direction
+        # Standard one-square pawn move.
+        if mov == (0, direction):
+            return True
 
-        print(mov)
+        # Initial two-square pawn move.
+        if mov == (0, 2 * direction) and not has_moved:
+            return True
 
-        allowed_mov = type.value[2][0]
-
-        print(allowed_mov[1] * coefficient)
-
-        if ((allowed_mov[1] * coefficient <= 0 and 0 >= mov[1] >= allowed_mov[1] * coefficient) or (allowed_mov[1] * coefficient >= 0 and 0 <= mov[1] <= allowed_mov[1] * coefficient)) and mov[0] == allowed_mov[0]:
+        # Diagonal pawn move used for captures and en passant.
+        if abs(mov[0]) == 1 and mov[1] == direction:
             return True
         
     if type == PawnType.ROI:

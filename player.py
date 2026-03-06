@@ -13,6 +13,9 @@ board_square = {
 }
 
 class Player:
+    # Stores the pawn that can be captured en passant on the next move only.
+    en_passant_target = None
+
     def __init__(self, board, color):
         self.has_win = False
         self.color = color
@@ -51,10 +54,50 @@ class Player:
             return False
         
         mov = (end_col - start_col, end_row - start_row)
+        # Track whether this move is an en passant capture.
+        is_en_passant = False
+        en_passant_pawn = None
 
         if not game.is_movement_allowed(self.board, mov, start_pawn):
             print("Move not allowed for this piece")
             return False
+
+        if start_pawn.get_type() == PawnType.PION:
+            direction = -1 if self.color.name == "BLANC" else 1
+
+            # Forward pawn moves must land on empty squares.
+            if mov[0] == 0:
+                if end_pawn is not None:
+                    print("A pawn cannot move forward onto an occupied square")
+                    return False
+
+                # A two-square advance is only valid if the intermediate square is empty.
+                if abs(mov[1]) == 2:
+                    middle_row = start_row + direction
+                    if self.board[middle_row][start_col] is not None:
+                        print("A pawn cannot jump over another piece")
+                        return False
+
+            # Diagonal pawn moves are captures, including en passant on an empty destination square.
+            elif abs(mov[0]) == 1 and mov[1] == direction:
+                if end_pawn is None:
+                    candidate = self.board[start_row][end_col]
+                    # En passant is only allowed against the pawn that just advanced two squares.
+                    if candidate is None or candidate != Player.en_passant_target:
+                        print("En passant not allowed")
+                        return False
+                    if candidate.get_type() != PawnType.PION or candidate.get_color() == self.color:
+                        print("En passant not allowed")
+                        return False
+
+                    is_en_passant = True
+                    en_passant_pawn = candidate
+                elif end_pawn.color == self.color:
+                    print("You cannot take your own piece")
+                    return False
+            else:
+                print("Move not allowed for this pawn")
+                return False
         
         # Check for piece at the final destination
         if end_pawn is not None and end_pawn.color == self.color:
@@ -100,7 +143,11 @@ class Player:
         print("Valid chess move")
         
         # Take opponent piece if there is one
-        if not is_rock and end_pawn is not None and end_pawn.color != self.color:
+        if is_en_passant:
+            print("En passant")
+            # Remove the adjacent pawn captured via en passant.
+            self.take(en_passant_pawn)
+        elif not is_rock and end_pawn is not None and end_pawn.color != self.color:
             print("You take an opponent piece")
             self.take(end_pawn)
 
@@ -118,6 +165,12 @@ class Player:
 
         self.board[end_row][end_col] = start_pawn
         self.board[start_row][start_col] = None
+
+        # Only a pawn that has just moved two squares can be captured en passant next turn.
+        if start_pawn.get_type() == PawnType.PION and abs(end_row - start_row) == 2:
+            Player.en_passant_target = start_pawn
+        else:
+            Player.en_passant_target = None
 
         return True
     
