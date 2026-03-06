@@ -55,3 +55,20 @@ def display_board(board) -> str:
 	lines.append(sep)
 	lines.append(header_or_footer())
 	print("\n".join(lines))
+
+
+def display_points(player_white, player_black) -> None:
+	white_taken = " ".join(piece_to_emoji(piece) for piece in player_white.taken_pieces) or "Aucune"
+	black_taken = " ".join(piece_to_emoji(piece) for piece in player_black.taken_pieces) or "Aucune"
+
+	print("\nPièces prises :")
+	print(f"Blanc : {white_taken} | Points : {player_white.points}")
+	print(f"Noir  : {black_taken} | Points : {player_black.points}")
+
+	advantage = player_white.points - player_black.points
+	if advantage > 0:
+		print(f"Avantage : Blanc +{advantage}")
+	elif advantage < 0:
+		print(f"Avantage : Noir +{abs(advantage)}")
+	else:
+		print("Avantage : Égalité")

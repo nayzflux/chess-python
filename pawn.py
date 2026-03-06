@@ -15,3 +15,6 @@ class Pawn:
 
     def set_has_moved(self, has_moved: bool):
         self.has_moved = has_moved
+
+    def get_points(self):
+        return self.pawn_type.value[1]
