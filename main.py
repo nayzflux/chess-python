@@ -4,7 +4,6 @@ from color import Color
 from game import play_round
 from pawn import Pawn
 from pawn_type import PawnType
-from display import display_board
 from player import Player
 
 test_rock_board = [
@@ -29,11 +28,14 @@ def init_board():
         [Pawn(PawnType.PION, Color.BLANC) for _ in range(8)],
         [Pawn(PawnType.TOUR, Color.BLANC), Pawn(PawnType.CAVALIER, Color.BLANC), Pawn(PawnType.FOU, Color.BLANC), Pawn(PawnType.DAME, Color.BLANC), Pawn(PawnType.ROI, Color.BLANC), Pawn(PawnType.FOU, Color.BLANC), Pawn(PawnType.CAVALIER, Color.BLANC), Pawn(PawnType.TOUR, Color.BLANC)],
     ]
-    return test_rock_board
+
+    return board
 
 
 if __name__ == "__main__":
-    board = init_board()
+
+    #board = init_board()
+    board = test_rock_board
 
     player_white = Player(board, Color.BLANC)
     player_black = Player(board, Color.NOIR)
