@@ -17,6 +17,7 @@ test_rock_board = [
         [Pawn(PawnType.TOUR, Color.BLANC), None, None, None, Pawn(PawnType.ROI, Color.BLANC), None, None, Pawn(PawnType.TOUR, Color.BLANC)],
     ]
 
+
 def init_board():
     board = [
         [Pawn(PawnType.TOUR, Color.NOIR), Pawn(PawnType.CAVALIER, Color.NOIR), Pawn(PawnType.FOU, Color.NOIR), Pawn(PawnType.DAME, Color.NOIR), Pawn(PawnType.ROI, Color.NOIR), Pawn(PawnType.FOU, Color.NOIR), Pawn(PawnType.CAVALIER, Color.NOIR), Pawn(PawnType.TOUR, Color.NOIR)],
