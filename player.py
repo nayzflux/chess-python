@@ -2,6 +2,7 @@ import re
 from pawn import Pawn
 import game
 from pawn_type import PawnType
+import copy
 
 board_square = {
     # Files
@@ -23,9 +24,41 @@ class Player:
         self.board = board
         self.taken_pieces = []
         self.points = 0
+        self.simulation_board = []
+        self.king_available_moves = []
+        self.king_attacked_moves = []
 
 
     def play(self, move : str):
+        #We are making a move and we check if the move is valid and if the king is in check after the move
+
+        simulation_ok = self.test_play(move)
+        if not simulation_ok:
+            return False
+
+        print("Simulation ok:", simulation_ok)
+        self.king_attacked_moves = game.King_attacked_moves(self.simulation_board, self.color)
+        self.king_available_moves = game.King_available_moves(self.simulation_board, self.color, self.king_attacked_moves)
+
+        king_in_check = game.is_king_in_check(board = self.simulation_board, color = self.color, king_attacked_moves=self.king_attacked_moves)
+        
+        if not king_in_check:
+            print("King is not in check")
+            #deepcopy is not working so we have to copy the board manually
+            for i in range(len(self.board)):
+                for j in range(len(self.board[i])):
+                    self.board[i][j] = self.simulation_board[i][j]
+
+            print(self.board)
+            return True
+        
+        elif king_in_check:
+            print("King is in check, move not allowed")
+            return False
+
+    
+    def test_play(self, move : str):
+        self.simulation_board = copy.deepcopy(self.board)
         pattern = r"[a-hA-H][1-8]-[a-hA-H][1-8]"
         move = move.strip()
 
@@ -41,8 +74,8 @@ class Player:
         end_col = board_square[move[3]]
         end_row = board_square[move[4]]
 
-        start_pawn = self.board[start_row][start_col]
-        end_pawn = self.board[end_row][end_col]
+        start_pawn = self.simulation_board[start_row][start_col]
+        end_pawn = self.simulation_board[end_row][end_col]
 
         if start_pawn is None:
             print("No piece at starting position")
@@ -58,7 +91,7 @@ class Player:
         is_en_passant = False
         en_passant_pawn = None
 
-        if not game.is_movement_allowed(self.board, mov, start_pawn, position=(start_row, start_col)):
+        if not game.is_movement_allowed(self.simulation_board, mov, start_pawn, position=(start_row, start_col)):
             print("Move not allowed for this piece")
             return False
 
@@ -74,14 +107,14 @@ class Player:
                 # A two-square advance is only valid if the intermediate square is empty.
                 if abs(mov[1]) == 2:
                     middle_row = start_row + direction
-                    if self.board[middle_row][start_col] is not None:
+                    if self.simulation_board[middle_row][start_col] is not None:
                         print("A pawn cannot jump over another piece")
                         return False
 
             # Diagonal pawn moves are captures, including en passant on an empty destination square.
             elif abs(mov[0]) == 1 and mov[1] == direction:
                 if end_pawn is None:
-                    candidate = self.board[start_row][end_col]
+                    candidate = self.simulation_board[start_row][end_col]
                     # En passant is only allowed against the pawn that just advanced two squares.
                     if candidate is None or candidate != Player.en_passant_target:
                         print("En passant not allowed")
@@ -119,7 +152,7 @@ class Player:
         # Check if rock is valid
         if is_rock:
             tower_col = 0 if is_big_rock else 7
-            tower = self.board[start_row][tower_col]
+            tower = self.simulation_board[start_row][tower_col]
 
             # Check if tower has moved
             if tower is None or tower.get_type() != PawnType.TOUR or tower.get_color() != self.color or tower.get_has_moved():
@@ -130,13 +163,11 @@ class Player:
             direction = -1 if is_big_rock else 1
 
             for col in range(start_col + direction, tower_col, direction):
-                if self.board[start_row][col] is not None:
+                if self.simulation_board[start_row][col] is not None:
                     print("ROCK not allowed because there is a piece between the king and the tower")
                     return False
-
-        # TODO: Check for piece in the way
         
-        # TODO: Check for danger on King
+        # TODO: Check for danger on King (Look is the piece is pinned)
 
         # TODO: Check if danger on the way for ROCK (Tower and King)
         
@@ -156,15 +187,15 @@ class Player:
             tower_col = 0 if is_big_rock else 7
             new_tower_col = start_col + (-1 if is_big_rock else 1)
 
-            self.board[start_row][new_tower_col] = self.board[start_row][tower_col]
-            self.board[start_row][tower_col] = None
-            self.board[start_row][new_tower_col].set_has_moved(True)
+            self.simulation_board[start_row][new_tower_col] = self.simulation_board[start_row][tower_col]
+            self.simulation_board[start_row][tower_col] = None
+            self.simulation_board[start_row][new_tower_col].set_has_moved(True)
 
         # Move the piece
         start_pawn.set_has_moved(True)
 
-        self.board[end_row][end_col] = start_pawn
-        self.board[start_row][start_col] = None
+        self.simulation_board[end_row][end_col] = start_pawn
+        self.simulation_board[start_row][start_col] = None
 
         # Only a pawn that has just moved two squares can be captured en passant next turn.
         if start_pawn.get_type() == PawnType.PION and abs(end_row - start_row) == 2:
@@ -173,7 +204,7 @@ class Player:
             Player.en_passant_target = None
 
         return True
-    
+
     def take(self, taken_piece: Pawn):
         # Add points for taken piece
         self.points += taken_piece.get_points()
@@ -182,7 +213,7 @@ class Player:
         self.taken_pieces.append(taken_piece)
 
         # Remove taken piece from board
-        for row in self.board:
+        for row in self.simulation_board:
             for i in range(len(row)):
                 if row[i] == taken_piece:
                     row[i] = None

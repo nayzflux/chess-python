@@ -34,13 +34,12 @@ def piece_to_emoji(pawn: Pawn):
         return BLACK.get(type, "?")
 
 
-def display_board(board) -> str:
+def display_board(board, attacks = []) -> str:
 	files = "ABCDEFGH"
 
 	def header_or_footer() -> str:
 		return "    " + " ".join(f" {f} " for f in files)
 
-	# lignes de séparation type +---+---+...
 	sep = "    +" + "+".join(["---"] * 8) + "+"
 
 	lines: list[str] = [header_or_footer()]
@@ -50,7 +49,10 @@ def display_board(board) -> str:
 		cells = []
 		for col in range(8):
 			piece = board[row][col]
-			cells.append(piece_to_emoji(piece))
+			cell = piece_to_emoji(piece)
+			if (row, col) in attacks:
+				cell = f"\033[41m{cell}\033[0m"
+			cells.append(cell)
 		lines.append(f" {rank}  | " + " | ".join(cells) + " |")
 	lines.append(sep)
 	lines.append(header_or_footer())
