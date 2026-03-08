@@ -3,6 +3,23 @@ from display import display_board, display_points
 from pawn import Pawn
 from pawn_type import PawnType
 
+def play_round(board, player, opponent, round_count):
+    display_board(board, player.king_attacked_moves)
+
+    if player.color == Color.BLANC:
+        display_points(player, opponent)
+        print("Au tour de Blanc:")
+    else:
+        display_points(opponent, player)
+        print("Au tour de Noir:")
+    print("---------------------------------")
+    move = input("Entrez votre coup (ex: d4-e5): ")
+
+    success = player.play(move)
+
+    if not success:
+        play_round(board, player, opponent, round_count)
+
 
 def is_movement_allowed(board, mov, pawn: Pawn, position):
     type = pawn.get_type()
@@ -72,15 +89,17 @@ def King_position(board, color):
                 return (row, col)
     return None
 
-def is_king_in_check(board, pawn, color, king_attacked_moves : list):
+def is_king_in_check(board, color, king_attacked_moves : list):
     # Check if the king of the given color is in check
     king_position = King_position(board, color)
     if king_position is None:
+        print("Error: King not found on the board")
         return False
 
-     # The king has is in check
+     # The king is in check
+    print("King position:", king_position)
     if king_position in king_attacked_moves:
-        return False 
+        return True
     
 def is_king_in_checkmate(board, pawn, color, king_attacked_moves : list, king_available_moves : list):
     # Check if the king of the given color is in checkmate
@@ -96,7 +115,7 @@ def is_king_in_checkmate(board, pawn, color, king_attacked_moves : list, king_av
 
 
 def is_path_clear(board, mov, position, pawn):
-    # Vérifie si le chemin entre start et end est dégagé
+    # Check if the path between the start and end positions is clear
     
     start_row, start_col = position
 
@@ -108,7 +127,7 @@ def is_path_clear(board, mov, position, pawn):
 
     path = [(start_row + i * step_row, start_col + i * step_col) for i in range(1, max(abs(mov[0]), abs(mov[1])))]
 
-    path_list = [board[row][col] for row, col in path]
+    path_list = [board[row][col] for row, col in path if 0 <= row < 8 and 0 <= col < 8]
 
     print("Path:", path)
     print("Path list:", path_list)
@@ -117,23 +136,6 @@ def is_path_clear(board, mov, position, pawn):
         print("Piece on the way")
     return all(piece is None for piece in path_list)
 
-
-def play_round(board, player, opponent, round_count):
-    display_board(board)
-    if player.color == Color.BLANC:
-        display_points(player, opponent)
-        print(f"Au tour de Blanc:")
-    else:
-        display_points(opponent, player)
-        print(f"Au tour de Noir:")
-
-    print("---------------------------------")
-    move = input("Entrez votre coup (ex: d4-e5): ")
-
-    success = player.play(move)
-
-    if not success:
-        play_round(board, player, opponent, round_count)
 
 
 def King_available_moves(board, color, king_attacked_moves : list):
@@ -162,12 +164,42 @@ def King_attacked_moves(board, color):
     for row in range(8):
         for col in range(8):
             piece = board[row][col]
-            if piece is not None and piece.get_color() != color:
+            if piece is not None and piece.get_color() != color and piece.get_type() != PawnType.ROI and piece.get_type() != PawnType.CAVALIER and piece.get_type() != PawnType.PION:
+                for move in piece.get_type().value[2]:
+
+                    start_row, start_col = row, col
+                    
+                    step_col = 0 if move[0] == 0 else (1 if move[0] > 0 else -1)
+                    step_row = 0 if move[1] == 0 else (1 if move[1] > 0 else -1)
+
+                    path = [(start_row + i * step_row, start_col + i * step_col) for i in range(1, max(abs(move[0]), abs(move[1])))]
+                    path = [i for i in path if 0 <= i[0] < 8 and 0 <= i[1] < 8]
+                    path_list = [board[row][col] for row, col in path if 0 <= row < 8 and 0 <= col < 8]
+
+                    for i in range(len(path_list)):
+                        if path_list[i] is not None:
+                            path = path[:i + 1]
+                            path_list = path_list[:i + 1]
+                            break
+                    for i in path:
+                        if i not in attacked_moves:
+                            attacked_moves.append(i)
+            if piece is not None and piece.get_color() != color and (piece.get_type() == PawnType.ROI or piece.get_type() == PawnType.CAVALIER):
                 for move in piece.get_type().value[2]:
                     new_row = row + move[1]
                     new_col = col + move[0]
 
                     if 0 <= new_row < 8 and 0 <= new_col < 8:
-                        attacked_moves.append((new_row, new_col))
-    
+                        if (new_row, new_col) not in attacked_moves:
+                            attacked_moves.append((new_row, new_col))
+            if piece is not None and piece.get_color() != color and piece.get_type() == PawnType.PION:
+                direction = 1 if piece.get_color() == Color.NOIR else -1
+                for move in [(1, direction), (-1, direction)]:
+                    new_row = row + move[1]
+                    new_col = col + move[0]
+
+                    if 0 <= new_row < 8 and 0 <= new_col < 8:
+                        if (new_row, new_col) not in attacked_moves:
+                            attacked_moves.append((new_row, new_col))   
+    print("Attacked moves:", attacked_moves)        
     return attacked_moves
