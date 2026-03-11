@@ -21,6 +21,7 @@ class Player:
         self.has_win = False
         self.color = color
         self.king_in_check = False
+        self.king_in_checkmate = False
         self.board = board
         self.taken_pieces = []
         self.points = 0
@@ -235,3 +236,10 @@ class Player:
             for i in range(len(row)):
                 if row[i] == taken_piece:
                     row[i] = None
+
+    def set_pinned_pieces_to_true(self, board, color):
+        for row in board:
+            for piece in row:
+                if piece is not None and piece.get_color() == color:
+                    piece.set_is_pinned(True)
+                

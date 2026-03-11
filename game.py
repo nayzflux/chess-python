@@ -215,3 +215,4 @@ def King_castle_moves(board, color, direction):
     castle_moves = [(king_position[0], king_position[1] + i * direction) for i in range(1, 3)]
     
     return castle_moves
+
