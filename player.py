@@ -32,6 +32,18 @@ class Player:
     def play(self, move : str):
         #We are making a move and we check if the move is valid and if the king is in check after the move
 
+        self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
+        self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_moves)
+        king_in_check_before_play = game.is_king_in_check(board = self.board, color = self.color, king_attacked_moves=self.king_attacked_moves)
+
+        if king_in_check_before_play:
+            print("Your king is in check, you must play a move that gets your king out of check")
+            self.king_in_check = True
+            simulation_king_in_check = self.test_play(move)
+            if not simulation_king_in_check:
+                return False
+            
+        
         simulation_ok = self.test_play(move)
         if not simulation_ok:
             return False
@@ -44,6 +56,7 @@ class Player:
         
         if not king_in_check:
             print("King is not in check")
+            self.king_in_check = False
             #deepcopy is not working so we have to copy the board manually
             for i in range(len(self.board)):
                 for j in range(len(self.board[i])):
