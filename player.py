@@ -179,6 +179,11 @@ class Player:
                 if self.simulation_board[start_row][col] is not None:
                     print("ROCK not allowed because there is a piece between the king and the tower")
                     return False
+            king_path_to_rock =  game.King_castle_moves(self.simulation_board, self.color, direction)
+            for move in king_path_to_rock:
+                if move in self.king_attacked_moves:
+                    print("ROCK not allowed because the king would be in check on the way")
+                    return False
         
         # TODO: Check for danger on King (Look is the piece is pinned)
 
