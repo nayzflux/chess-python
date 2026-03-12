@@ -28,7 +28,23 @@ class Player:
         self.simulation_board = []
         self.king_available_moves = []
         self.king_attacked_moves = []
+   
 
+    def look_if_king_in_checkmate(self):
+        self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
+        self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_moves)
+        king_in_check_before_play = game.is_king_in_check(board = self.board, color = self.color, king_attacked_moves=self.king_attacked_moves)
+        all_legal_moves = self.get_all_legal_moves(self.board, self.color)
+        
+
+        if king_in_check_before_play:
+            blocking_moves = self.get_checks_blocking_moves(self.board, self.color)
+            print("All legal moves:", blocking_moves)
+            if blocking_moves == []:
+                print("You are in checkmate")
+
+                self.king_in_checkmate = True
+                return True
 
     def play(self, move : str):
         #We are making a move and we check if the move is valid and if the king is in check after the move
@@ -36,9 +52,18 @@ class Player:
         self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
         self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_moves)
         king_in_check_before_play = game.is_king_in_check(board = self.board, color = self.color, king_attacked_moves=self.king_attacked_moves)
+        all_legal_moves = self.get_all_legal_moves(self.board, self.color)
+        blocking_moves = self.get_checks_blocking_moves(self.board, self.color)
+        print("blocking moves:", blocking_moves)
 
         if king_in_check_before_play:
+            
+            if move not in blocking_moves:
+                print("You are in checkmate")
+                self.king_in_checkmate = True
+                return True
             print("Your king is in check, you must play a move that gets your king out of check")
+
             self.king_in_check = True
             simulation_king_in_check = self.test_play(move)
             if not simulation_king_in_check:
@@ -159,9 +184,9 @@ class Player:
             is_rock = True
             if end_col - start_col == -2:
                 is_big_rock = True
-                print("Big ROCK detected")
+                print("Long castle detected")
             else:
-                print("Small ROCK detected")
+                print("Short castle detected")
 
         # Check if rock is valid
         if is_rock:
@@ -242,4 +267,22 @@ class Player:
             for piece in row:
                 if piece is not None and piece.get_color() == color:
                     piece.set_is_pinned(True)
-                
+
+    def get_all_legal_moves(self, board, color):
+        legal_moves = []
+        annotated_moves = game.get_all_annotated_moves(board, color)
+        print("Annotated moves:", annotated_moves)
+        for move in annotated_moves:
+            if self.test_play(move):
+                legal_moves.append(move)
+        return legal_moves
+    
+    def get_checks_blocking_moves(self, board, color):
+        blocking_moves = []
+        annotated_moves = game.get_all_annotated_moves(board, color)
+        for move in annotated_moves:
+            if self.test_play(move):
+                self.king_attacked_moves = game.King_attacked_moves(self.simulation_board, self.color)
+                if not game.is_king_in_check(board = self.simulation_board, color = self.color, king_attacked_moves=self.king_attacked_moves):
+                    blocking_moves.append(move)
+        return blocking_moves

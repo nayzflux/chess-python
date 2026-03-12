@@ -4,18 +4,24 @@ from pawn import Pawn
 from pawn_type import PawnType
 
 def play_round(board, player, opponent, round_count):
-    display_board(board, player.king_attacked_moves)
+    
+    player.look_if_king_in_checkmate()
 
-    if player.color == Color.BLANC:
-        display_points(player, opponent)
-        print("Au tour de Blanc:")
+    if player.king_in_checkmate:
+        print(f"Checkmate! {opponent.color.value} wins!")
+        success = True
     else:
-        display_points(opponent, player)
-        print("Au tour de Noir:")
-    print("---------------------------------")
-    move = input("Entrez votre coup (ex: d4-e5): ")
+        display_board(board, player.king_attacked_moves)
 
-    success = player.play(move)
+        if player.color == Color.BLANC:
+            display_points(player, opponent)
+            print("Au tour de Blanc:")
+        else:
+            display_points(opponent, player)
+            print("Au tour de Noir:")
+        print("---------------------------------")
+        move = input("Entrez votre coup (ex: d4-e5): ")
+        success = player.play(move)
 
     if not success:
         play_round(board, player, opponent, round_count)
@@ -200,8 +206,7 @@ def King_attacked_moves(board, color):
 
                     if 0 <= new_row < 8 and 0 <= new_col < 8:
                         if (new_row, new_col) not in attacked_moves:
-                            attacked_moves.append((new_row, new_col))   
-    print("Attacked moves:", attacked_moves)        
+                            attacked_moves.append((new_row, new_col))         
     return attacked_moves
 
 def King_castle_moves(board, color, direction):
@@ -216,3 +221,75 @@ def King_castle_moves(board, color, direction):
     
     return castle_moves
 
+def every_piece_move(board, color):
+    # Return a list of moves the player can make
+    attacked_moves = []
+
+    for row in range(8):
+        for col in range(8):
+            piece = board[row][col]
+            if piece is not None and piece.get_color() == color and piece.get_type() != PawnType.ROI and piece.get_type() != PawnType.CAVALIER and piece.get_type() != PawnType.PION:
+                for move in piece.get_type().value[2]:
+
+                    start_row, start_col = row, col
+                    
+                    step_col = 0 if move[0] == 0 else (1 if move[0] > 0 else -1)
+                    step_row = 0 if move[1] == 0 else (1 if move[1] > 0 else -1)
+
+                    path = [(start_row + i * step_row, start_col + i * step_col) for i in range(1, max(abs(move[0]), abs(move[1])))]
+                    path = [i for i in path if 0 <= i[0] < 8 and 0 <= i[1] < 8]
+                    path_list = [board[row][col] for row, col in path if 0 <= row < 8 and 0 <= col < 8]
+
+                    for i in range(len(path_list)):
+                        if path_list[i] is not None:
+                            path = path[:i + 1]
+                            path_list = path_list[:i + 1]
+                            break
+                    for i in path:
+                        if i not in attacked_moves:
+                            attacked_moves.append(((row, col), i))
+            if piece is not None and piece.get_color() == color and (piece.get_type() == PawnType.ROI or piece.get_type() == PawnType.CAVALIER):
+                for move in piece.get_type().value[2]:
+                    new_row = row + move[1]
+                    new_col = col + move[0]
+
+                    if 0 <= new_row < 8 and 0 <= new_col < 8:
+                        if (new_row, new_col) not in attacked_moves:
+                            attacked_moves.append(((row, col), (new_row, new_col)))
+            if piece is not None and piece.get_color() == color and piece.get_type() == PawnType.PION:
+                direction = 1 if piece.get_color() == Color.NOIR else -1
+                for move in [(1, direction), (-1, direction)]:
+                    new_row = row + move[1]
+                    new_col = col + move[0]
+
+                    if 0 <= new_row < 8 and 0 <= new_col < 8:
+                        if (new_row, new_col) not in attacked_moves:
+                            attacked_moves.append(((row, col), (new_row, new_col))) 
+    return attacked_moves
+
+def get_all_annotated_moves(board, color):
+    # Look at all moves for all our pieces that are still in the 8x8 board using previouly build funtions
+
+    valid_moves = []
+    valid_moves = every_piece_move(board, color)
+
+    #including pawn moves that are not attacks
+    pawn_moves = [(0, 1), (0, 2), (1, 1), (-1, 1)] if color == Color.NOIR else [(0, -1), (0, -2), (1, -1), (-1, -1)]
+    for row in range(8):
+        for col in range(8):
+            piece = board[row][col]
+            if piece is not None and piece.get_color() == color and piece.get_type() != PawnType.PION:
+                for move in pawn_moves:
+
+                    new_row = row + move[1]
+                    new_col = col + move[0]
+
+                    if 0 <= new_row < 8 and 0 <= new_col < 8:
+                        valid_moves.append(((row, col), (new_row, new_col)))
+    
+    #Convert moves into chess notation
+    chr_cte = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
+    num_cte = {0: "8", 1: "7", 2: "6", 3: "5", 4: "4", 5: "3", 6: "2", 7: "1"}
+    notated_moves = [f"{chr_cte[i[0]]}{num_cte[i[1]]}-{chr_cte[j[0]]}{num_cte[j[1]]}" for i, j in valid_moves]
+
+    return notated_moves
