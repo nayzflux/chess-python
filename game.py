@@ -203,3 +203,16 @@ def King_attacked_moves(board, color):
                             attacked_moves.append((new_row, new_col))   
     print("Attacked moves:", attacked_moves)        
     return attacked_moves
+
+def King_castle_moves(board, color, direction):
+    # Return a list of available castle moves for the king of the given color
+    castle_moves = []
+
+    king_position = King_position(board, color)
+    if king_position is None:
+        return castle_moves
+
+    castle_moves = [(king_position[0], king_position[1] + i * direction) for i in range(1, 3)]
+    
+    return castle_moves
+
