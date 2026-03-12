@@ -14,10 +14,9 @@ board_square = {
 }
 
 class Player:
-    # Stores the pawn that can be captured en passant on the next move only.
-    en_passant_target = None
-
     def __init__(self, board, color):
+        self.en_passant_target = None
+        self.has_rock = False
         self.has_win = False
         self.color = color
         self.king_in_check = False
@@ -27,6 +26,7 @@ class Player:
         self.simulation_board = []
         self.king_available_moves = []
         self.king_attacked_moves = []
+        self.board_history = []
 
 
     def play(self, move : str):
@@ -43,13 +43,14 @@ class Player:
         king_in_check = game.is_king_in_check(board = self.simulation_board, color = self.color, king_attacked_moves=self.king_attacked_moves)
         
         if not king_in_check:
+            # Apply the move to the actual board since it's valid and doesn't put the king in check.
             print("King is not in check")
             #deepcopy is not working so we have to copy the board manually
             for i in range(len(self.board)):
                 for j in range(len(self.board[i])):
                     self.board[i][j] = self.simulation_board[i][j]
 
-            print(self.board)
+            # print(self.board)
             return True
         
         elif king_in_check:
@@ -116,7 +117,7 @@ class Player:
                 if end_pawn is None:
                     candidate = self.simulation_board[start_row][end_col]
                     # En passant is only allowed against the pawn that just advanced two squares.
-                    if candidate is None or candidate != Player.en_passant_target:
+                    if candidate is None or candidate != self.en_passant_target:
                         print("En passant not allowed")
                         return False
                     if candidate.get_type() != PawnType.PION or candidate.get_color() == self.color:
@@ -199,9 +200,9 @@ class Player:
 
         # Only a pawn that has just moved two squares can be captured en passant next turn.
         if start_pawn.get_type() == PawnType.PION and abs(end_row - start_row) == 2:
-            Player.en_passant_target = start_pawn
+            self.en_passant_target = start_pawn
         else:
-            Player.en_passant_target = None
+            self.en_passant_target = None
 
         return True
 
