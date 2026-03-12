@@ -21,6 +21,7 @@ class Player:
         self.has_win = False
         self.color = color
         self.king_in_check = False
+        self.king_in_checkmate = False
         self.board = board
         self.taken_pieces = []
         self.points = 0
@@ -32,6 +33,18 @@ class Player:
     def play(self, move : str):
         #We are making a move and we check if the move is valid and if the king is in check after the move
 
+        self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
+        self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_moves)
+        king_in_check_before_play = game.is_king_in_check(board = self.board, color = self.color, king_attacked_moves=self.king_attacked_moves)
+
+        if king_in_check_before_play:
+            print("Your king is in check, you must play a move that gets your king out of check")
+            self.king_in_check = True
+            simulation_king_in_check = self.test_play(move)
+            if not simulation_king_in_check:
+                return False
+            
+        
         simulation_ok = self.test_play(move)
         if not simulation_ok:
             return False
@@ -44,6 +57,7 @@ class Player:
         
         if not king_in_check:
             print("King is not in check")
+            self.king_in_check = False
             #deepcopy is not working so we have to copy the board manually
             for i in range(len(self.board)):
                 for j in range(len(self.board[i])):
@@ -166,6 +180,11 @@ class Player:
                 if self.simulation_board[start_row][col] is not None:
                     print("ROCK not allowed because there is a piece between the king and the tower")
                     return False
+            king_path_to_rock =  game.King_castle_moves(self.simulation_board, self.color, direction)
+            for move in king_path_to_rock:
+                if move in self.king_attacked_moves:
+                    print("ROCK not allowed because the king would be in check on the way")
+                    return False
         
         # TODO: Check for danger on King (Look is the piece is pinned)
 
@@ -217,3 +236,10 @@ class Player:
             for i in range(len(row)):
                 if row[i] == taken_piece:
                     row[i] = None
+
+    def set_pinned_pieces_to_true(self, board, color):
+        for row in board:
+            for piece in row:
+                if piece is not None and piece.get_color() == color:
+                    piece.set_is_pinned(True)
+                
