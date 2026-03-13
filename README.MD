@@ -5,10 +5,10 @@ The first version will be a chess game in the terminal between two players
 - King in check after oponent moves --> (Done)
 - A player must respond if their king is in check (and after reponse king is no more in check) and can't rock. --> (Done)
 - The squares near the king are not attacked to allow rock --> (Done)
-- The player still has legal moves (Have to consider if piece is pinned set can move to false)
+- The player still has legal moves (Have to consider if piece is pinned set can move to false) --> (Done)
     - Look if piece is pinned set pinned to true
     - Move any piece
     - Block check moves 
-- Checkmate implementation
+- Checkmate implementation --> (Done)
 - Pat and moves history
 - We will see if we'll add the 50 moves rule

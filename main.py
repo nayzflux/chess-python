@@ -16,6 +16,16 @@ test_rock_board = [
         [Pawn(PawnType.PION, Color.BLANC) for _ in range(8)],
         [Pawn(PawnType.TOUR, Color.BLANC), None, None, None, Pawn(PawnType.ROI, Color.BLANC), None, None, Pawn(PawnType.TOUR, Color.BLANC)],
     ]
+sequence_board = [
+    [None, None, None, None, Pawn(PawnType.ROI, Color.NOIR), None, None, None],
+    [None, None, None, Pawn(PawnType.PION, Color.NOIR), Pawn(PawnType.PION, Color.NOIR), Pawn(PawnType.PION, Color.NOIR), None, None],
+    [None, None, None, None, None, None, None, None],
+    [None, None, None, None, None, None, None, None],
+    [None, None, None, None, None, None, None, None],
+    [None, None, None, None, None, None, None, None],
+    [None, None, None, None, None, None,  Pawn(PawnType.TOUR, Color.NOIR), None],
+    [None, None, None, None, Pawn(PawnType.ROI, Color.BLANC), None, None, Pawn(PawnType.DAME, Color.BLANC)],
+]
 test_castling_board = [
 
     [Pawn(PawnType.TOUR, Color.NOIR), None, None, None, Pawn(PawnType.ROI, Color.NOIR), None, None, Pawn(PawnType.TOUR, Color.NOIR)],
@@ -59,17 +69,22 @@ def init_board():
 if __name__ == "__main__":
 
     #board = init_board()
-    board = test_castling_board
+    board = sequence_board
 
     player_white = Player(board, Color.BLANC)
     player_black = Player(board, Color.NOIR)
 
     current_player = player_white
     round_count = 1
-    
-    while True:
+    run = True
+    while run:
         # TODO: Check win condition
         opponent = player_black if current_player.color == Color.BLANC else player_white
+
         play_round(board, current_player, opponent, round_count)
+        if current_player.king_in_checkmate:
+            print(f"Checkmate! {opponent.color.value} wins!")
+            run = False
+            break
         round_count += 1
         current_player = player_black if current_player.color == Color.BLANC else player_white
