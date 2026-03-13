@@ -18,10 +18,10 @@ def title():
     for row in title_board:
         for cell in row:
             if cell == "_":
-                display_str += "\033[40m \033[0m"  # Black background
+                display_str += "\033[47m \033[0m"  # Black background
             else:
-                display_str += "\033[47m \033[0m"  # White background
+                display_str += "\033[40m \033[0m"  # White background
         display_str += "\n"
     
     print(display_str)
-    return title_board
+    return display_str

@@ -1,10 +1,12 @@
 
-
+from frontend import title
 from color import Color
 from game import play_round
 from pawn import Pawn
 from pawn_type import PawnType
 from player import Player
+
+title()
 
 test_rock_board = [
         [Pawn(PawnType.TOUR, Color.NOIR), Pawn(PawnType.CAVALIER, Color.NOIR), None, None, Pawn(PawnType.ROI, Color.NOIR), Pawn(PawnType.FOU, Color.NOIR), None, Pawn(PawnType.TOUR, Color.NOIR)],
