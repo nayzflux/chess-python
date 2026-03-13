@@ -89,7 +89,6 @@ def is_movement_allowed(board, mov, pawn: Pawn, position):
                 and abs(mov[1]) <= abs(allowed_mov[1])
                 and abs(mov[0]) == abs(mov[1])
             ):
-                print(mov)
                 if is_path_clear(board, mov, position, pawn):
                     return True
         return False
@@ -123,12 +122,14 @@ def is_king_in_check(board, color, king_attacked_moves: list):
     if king_position in king_attacked_moves:
         return True
 
+    return False
+
 
 def is_king_in_checkmate(
-    board, pawn, color, king_attacked_moves: list, king_available_moves: list
+    board, color, king_attacked_moves: list, king_available_moves: list
 ):
     # Check if the king of the given color is in checkmate
-    if not is_king_in_check(board, pawn, color, king_attacked_moves):
+    if not is_king_in_check(board, color, king_attacked_moves):
         return False
 
     # Check if the king has any legal move to escape check

@@ -9,6 +9,10 @@ from player import Player
 history: Dict[str, int] = {}
 
 
+def reset_history():
+    history.clear()
+
+
 # Créer un hash depuis un string
 def hash(text: str):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
