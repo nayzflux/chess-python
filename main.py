@@ -1,9 +1,12 @@
+from frontend import title
 from color import Color
 from game import play_round
 from history_helper import check_repetition, save_board
 from pawn import Pawn
 from pawn_type import PawnType
 from player import Player
+
+title()
 
 test_rock_board = [
     [

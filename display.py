@@ -2,7 +2,6 @@ from color import Color
 from pawn import Pawn
 from pawn_type import PawnType
 
-
 def piece_to_emoji(pawn: Pawn):
     if pawn is None:
         return " "
