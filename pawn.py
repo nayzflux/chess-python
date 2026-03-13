@@ -1,5 +1,9 @@
+from color import Color
+from pawn_type import PawnType
+
+
 class Pawn:
-    def __init__(self, pawn_type, color):
+    def __init__(self, pawn_type: PawnType, color: Color):
         self.pawn_type = pawn_type
         self.color = color
         self.has_moved = False
@@ -7,10 +11,10 @@ class Pawn:
 
     def get_type(self):
         return self.pawn_type
-    
+
     def get_color(self):
         return self.color
-    
+
     def get_has_moved(self):
         return self.has_moved
 
@@ -19,6 +23,9 @@ class Pawn:
 
     def get_points(self):
         return self.pawn_type.value[1]
-    
+
     def set_is_pinned(self, is_pinned: bool):
         self.is_pinned = is_pinned
+
+    def get_is_pinned(self):
+        return self.is_pinned
