@@ -1,21 +1,44 @@
-import re
-from pawn import Pawn
-import game
-from pawn_type import PawnType
 import copy
+import re
+
+import game
+from color import Color
+from pawn import Pawn
+from pawn_type import PawnType
 
 board_square = {
     # Files
-    "a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7,
-    "A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7,
-
+    "a": 0,
+    "b": 1,
+    "c": 2,
+    "d": 3,
+    "e": 4,
+    "f": 5,
+    "g": 6,
+    "h": 7,
+    "A": 0,
+    "B": 1,
+    "C": 2,
+    "D": 3,
+    "E": 4,
+    "F": 5,
+    "G": 6,
+    "H": 7,
     # Lines
-    "1": 7, "2": 6, "3": 5, "4": 4,"5": 3, "6": 2, "7": 1, "8": 0
+    "1": 7,
+    "2": 6,
+    "3": 5,
+    "4": 4,
+    "5": 3,
+    "6": 2,
+    "7": 1,
+    "8": 0,
 }
 
+
 class Player:
-    def __init__(self, board, color):
-        self.en_passant_target = None
+    def __init__(self, board, color: Color):
+        self.en_passant_target: Pawn | None = None
         self.has_rock = False
         self.has_win = False
         self.color = color
@@ -27,76 +50,93 @@ class Player:
         self.simulation_board = []
         self.king_available_moves = []
         self.king_attacked_moves = []
-   
 
     def look_if_king_in_checkmate(self):
         self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
-        self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_moves)
-        king_in_check_before_play = game.is_king_in_check(board = self.board, color = self.color, king_attacked_moves=self.king_attacked_moves)
+        self.king_available_moves = game.King_available_moves(
+            self.board, self.color, self.king_attacked_moves
+        )
+        king_in_check_before_play = game.is_king_in_check(
+            board=self.board,
+            color=self.color,
+            king_attacked_moves=self.king_attacked_moves,
+        )
         all_legal_moves = self.get_all_legal_moves(self.board, self.color)
-        
 
         if king_in_check_before_play:
             blocking_moves = self.get_checks_blocking_moves(self.board, self.color)
-            print("All legal moves:", blocking_moves)
+            # print("All legal moves:", blocking_moves)
             if blocking_moves == []:
                 print("You are in checkmate")
 
                 self.king_in_checkmate = True
                 return True
 
-    def play(self, move : str):
-        #We are making a move and we check if the move is valid and if the king is in check after the move
+    def play(self, move: str):
+        # We are making a move and we check if the move is valid and if the king is in check after the move
 
         self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
-        self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_moves)
-        king_in_check_before_play = game.is_king_in_check(board = self.board, color = self.color, king_attacked_moves=self.king_attacked_moves)
+        self.king_available_moves = game.King_available_moves(
+            self.board, self.color, self.king_attacked_moves
+        )
+        king_in_check_before_play = game.is_king_in_check(
+            board=self.board,
+            color=self.color,
+            king_attacked_moves=self.king_attacked_moves,
+        )
         all_legal_moves = self.get_all_legal_moves(self.board, self.color)
         blocking_moves = self.get_checks_blocking_moves(self.board, self.color)
-        print("blocking moves:", blocking_moves)
+        # print("blocking moves:", blocking_moves)
 
         if king_in_check_before_play:
-            
             if move not in blocking_moves:
                 print("You are in checkmate")
                 self.king_in_checkmate = True
                 return True
-            print("Your king is in check, you must play a move that gets your king out of check")
+            print(
+                "Your king is in check, you must play a move that gets your king out of check"
+            )
 
             self.king_in_check = True
             simulation_king_in_check = self.test_play(move)
             if not simulation_king_in_check:
                 return False
-            
-        
+
         simulation_ok = self.test_play(move)
         if not simulation_ok:
             return False
 
-        print("Simulation ok:", simulation_ok)
-        self.king_attacked_moves = game.King_attacked_moves(self.simulation_board, self.color)
-        self.king_available_moves = game.King_available_moves(self.simulation_board, self.color, self.king_attacked_moves)
+        # print("Simulation ok:", simulation_ok)
+        self.king_attacked_moves = game.King_attacked_moves(
+            self.simulation_board, self.color
+        )
+        self.king_available_moves = game.King_available_moves(
+            self.simulation_board, self.color, self.king_attacked_moves
+        )
 
-        king_in_check = game.is_king_in_check(board = self.simulation_board, color = self.color, king_attacked_moves=self.king_attacked_moves)
-        
+        king_in_check = game.is_king_in_check(
+            board=self.simulation_board,
+            color=self.color,
+            king_attacked_moves=self.king_attacked_moves,
+        )
+
         if not king_in_check:
             # Apply the move to the actual board since it's valid and doesn't put the king in check.
-            print("King is not in check")
+            # print("King is not in check")
             self.king_in_check = False
-            #deepcopy is not working so we have to copy the board manually
+            # deepcopy is not working so we have to copy the board manually
             for i in range(len(self.board)):
                 for j in range(len(self.board[i])):
                     self.board[i][j] = self.simulation_board[i][j]
 
             # print(self.board)
             return True
-        
+
         elif king_in_check:
             print("King is in check, move not allowed")
             return False
 
-    
-    def test_play(self, move : str):
+    def test_play(self, move: str):
         self.simulation_board = copy.deepcopy(self.board)
         pattern = r"[a-hA-H][1-8]-[a-hA-H][1-8]"
         move = move.strip()
@@ -105,8 +145,8 @@ class Player:
             print("Invalid format, please use the format 'a2-a3' or 'A2-A3'")
             return False
 
-        print("Valid move format")
-        
+        # print("Valid move format")
+
         # Convert move string to coordinates
         start_col = board_square[move[0]]
         start_row = board_square[move[1]]
@@ -117,21 +157,23 @@ class Player:
         end_pawn = self.simulation_board[end_row][end_col]
 
         if start_pawn is None:
-            print("No piece at starting position")
+            # print("No piece at starting position")
             return False
-        
+
         # Check if the piece belongs to the player
         if isinstance(start_pawn, Pawn) and start_pawn.get_color() != self.color:
             print("This is not your piece, you can only play your pieces")
             return False
-        
+
         mov = (end_col - start_col, end_row - start_row)
         # Track whether this move is an en passant capture.
         is_en_passant = False
         en_passant_pawn = None
 
-        if not game.is_movement_allowed(self.simulation_board, mov, start_pawn, position=(start_row, start_col)):
-            print("Move not allowed for this piece")
+        if not game.is_movement_allowed(
+            self.simulation_board, mov, start_pawn, position=(start_row, start_col)
+        ):
+            # print("Move not allowed for this piece")
             return False
 
         if start_pawn.get_type() == PawnType.PION:
@@ -158,7 +200,10 @@ class Player:
                     if candidate is None or candidate != self.en_passant_target:
                         print("En passant not allowed")
                         return False
-                    if candidate.get_type() != PawnType.PION or candidate.get_color() == self.color:
+                    if (
+                        candidate.get_type() != PawnType.PION
+                        or candidate.get_color() == self.color
+                    ):
                         print("En passant not allowed")
                         return False
 
@@ -170,17 +215,21 @@ class Player:
             else:
                 print("Move not allowed for this pawn")
                 return False
-        
+
         # Check for piece at the final destination
         if end_pawn is not None and end_pawn.color == self.color:
-            print("You cannot take your own piece")
+            # print("You cannot take your own piece")
             return False
-        
+
         # Detect if the move is ROCK
         is_rock = False
         is_big_rock = False
 
-        if start_pawn.get_type() == PawnType.ROI and abs(end_col - start_col) == 2 and not start_pawn.has_moved:
+        if (
+            start_pawn.get_type() == PawnType.ROI
+            and abs(end_col - start_col) == 2
+            and not start_pawn.has_moved
+        ):
             is_rock = True
             if end_col - start_col == -2:
                 is_big_rock = True
@@ -194,8 +243,13 @@ class Player:
             tower = self.simulation_board[start_row][tower_col]
 
             # Check if tower has moved
-            if tower is None or tower.get_type() != PawnType.TOUR or tower.get_color() != self.color or tower.get_has_moved():
-                print("ROCK not allowed because the tower is not valid")
+            if (
+                tower is None
+                or tower.get_type() != PawnType.TOUR
+                or tower.get_color() != self.color
+                or tower.get_has_moved()
+            ):
+                print("Castle not allowed because the tower is not valid")
                 return False
 
             # Check if piece on the way for ROCK (Tower and King)
@@ -203,27 +257,29 @@ class Player:
 
             for col in range(start_col + direction, tower_col, direction):
                 if self.simulation_board[start_row][col] is not None:
-                    print("ROCK not allowed because there is a piece between the king and the tower")
+                    print(
+                        "Castle not allowed because there is a piece between the king and the tower"
+                    )
                     return False
-            king_path_to_rock =  game.King_castle_moves(self.simulation_board, self.color, direction)
+            king_path_to_rock = game.King_castle_moves(
+                self.simulation_board, self.color, direction
+            )
             for move in king_path_to_rock:
                 if move in self.king_attacked_moves:
-                    print("ROCK not allowed because the king would be in check on the way")
+                    print(
+                        "Castle not allowed because the king would be in check on the way"
+                    )
                     return False
-        
-        # TODO: Check for danger on King (Look is the piece is pinned)
 
-        # TODO: Check if danger on the way for ROCK (Tower and King)
-        
-        print("Valid chess move")
-        
+        # print("Valid chess move")
+
         # Take opponent piece if there is one
         if is_en_passant:
             print("En passant")
             # Remove the adjacent pawn captured via en passant.
             self.take(en_passant_pawn)
         elif not is_rock and end_pawn is not None and end_pawn.color != self.color:
-            print("You take an opponent piece")
+            # print("You take an opponent piece")
             self.take(end_pawn)
 
         # Move the tower for ROCK
@@ -231,7 +287,9 @@ class Player:
             tower_col = 0 if is_big_rock else 7
             new_tower_col = start_col + (-1 if is_big_rock else 1)
 
-            self.simulation_board[start_row][new_tower_col] = self.simulation_board[start_row][tower_col]
+            self.simulation_board[start_row][new_tower_col] = self.simulation_board[
+                start_row
+            ][tower_col]
             self.simulation_board[start_row][tower_col] = None
             self.simulation_board[start_row][new_tower_col].set_has_moved(True)
 
@@ -271,18 +329,33 @@ class Player:
     def get_all_legal_moves(self, board, color):
         legal_moves = []
         annotated_moves = game.get_all_annotated_moves(board, color)
-        print("Annotated moves:", annotated_moves)
+        # print("Annotated moves:", annotated_moves)
         for move in annotated_moves:
             if self.test_play(move):
                 legal_moves.append(move)
         return legal_moves
-    
+
     def get_checks_blocking_moves(self, board, color):
         blocking_moves = []
         annotated_moves = game.get_all_annotated_moves(board, color)
         for move in annotated_moves:
             if self.test_play(move):
-                self.king_attacked_moves = game.King_attacked_moves(self.simulation_board, self.color)
-                if not game.is_king_in_check(board = self.simulation_board, color = self.color, king_attacked_moves=self.king_attacked_moves):
+                self.king_attacked_moves = game.King_attacked_moves(
+                    self.simulation_board, self.color
+                )
+                if not game.is_king_in_check(
+                    board=self.simulation_board,
+                    color=self.color,
+                    king_attacked_moves=self.king_attacked_moves,
+                ):
                     blocking_moves.append(move)
         return blocking_moves
+
+    def get_has_rock(self):
+        return self.has_rock
+
+    def get_en_passant_target(self):
+        return self.en_passant_target
+
+    def get_color(self):
+        return self.color
