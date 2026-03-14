@@ -1,4 +1,3 @@
-import copy
 import re
 
 import game
@@ -332,7 +331,12 @@ class Player:
         # print("Annotated moves:", annotated_moves)
         for move in annotated_moves:
             if self.test_play(move):
-                legal_moves.append(move)
+                
+                self.king_attacked_moves = game.King_attacked_moves(self.simulation_board, self.color)
+                if game.is_king_in_check(board = self.simulation_board, color = self.color, king_attacked_moves=self.king_attacked_moves):
+                    pass
+                else:
+                    legal_moves.append(move)
         return legal_moves
 
     def get_checks_blocking_moves(self, board, color):
@@ -340,14 +344,8 @@ class Player:
         annotated_moves = game.get_all_annotated_moves(board, color)
         for move in annotated_moves:
             if self.test_play(move):
-                self.king_attacked_moves = game.King_attacked_moves(
-                    self.simulation_board, self.color
-                )
-                if not game.is_king_in_check(
-                    board=self.simulation_board,
-                    color=self.color,
-                    king_attacked_moves=self.king_attacked_moves,
-                ):
+                self.king_attacked_moves = game.King_attacked_moves(self.simulation_board, self.color)
+                if not game.is_king_in_check(board = self.simulation_board, color = self.color, king_attacked_moves=self.king_attacked_moves):
                     blocking_moves.append(move)
         return blocking_moves
 

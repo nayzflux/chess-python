@@ -10,5 +10,6 @@ The first version will be a chess game in the terminal between two players
     - Move any piece
     - Block check moves 
 - Checkmate implementation --> (Done)
-- Pat and moves history
+- Stalemate if no move available --> (Done)
+- Stalemate if 3 repetition --> (Done)
 - We will see if we'll add the 50 moves rule

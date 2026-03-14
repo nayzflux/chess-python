@@ -376,9 +376,5 @@ def get_all_annotated_moves(board, color):
     # Convert moves into chess notation
     chr_cte = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
     num_cte = {0: "8", 1: "7", 2: "6", 3: "5", 4: "4", 5: "3", 6: "2", 7: "1"}
-    notated_moves = [
-        f"{chr_cte[i[0]]}{num_cte[i[1]]}-{chr_cte[j[0]]}{num_cte[j[1]]}"
-        for i, j in valid_moves
-    ]
-
+    notated_moves = [f"{chr_cte[i[1]]}{num_cte[i[0]]}-{chr_cte[j[1]]}{num_cte[j[0]]}" for i, j in valid_moves]
     return notated_moves
