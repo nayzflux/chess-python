@@ -5,12 +5,13 @@ import game
 from pawn_type import PawnType
 import copy
 
+# We define this dictionnary to convert the board coordinates from (0,0) to a8 for example
 board_square = {
-    # Files
+    # rows
     "a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7,
     "A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7,
 
-    # Lines
+    # lines
     "1": 7, "2": 6, "3": 5, "4": 4,"5": 3, "6": 2, "7": 1, "8": 0
 }
 
@@ -31,13 +32,19 @@ class Player:
         self.king_attacked_moves = []
 
     def look_if_king_in_checkmate_or_stalemate(self):
-        self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
-        self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_moves)
-        king_in_check_before_play = game.is_king_in_check(board=self.board,color=self.color,king_attacked_moves=self.king_attacked_moves,
-        )
+        #This funtion is called before the user plays his move to check if his in checkmate or in stalemate
+
+        self.king_attacked_squares = game.King_attacked_moves(self.board, self.color)
+        self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_squares)
+        king_in_check_before_play = game.is_king_in_check(self.board, self.color, self.king_attacked_squares)
+
+        # Just to make it explicit
+        self.king_in_check = king_in_check_before_play
+
         all_legal_moves = self.get_all_legal_moves(self.board, self.color)
 
         if king_in_check_before_play:
+            #If the king is in check before we play we check if there's a solution to avoid check and otherwise it's checkmate
             blocking_moves = self.get_checks_blocking_moves(self.board, self.color)
             #print("All legal moves:", blocking_moves)
             if blocking_moves == []:
@@ -52,59 +59,22 @@ class Player:
 
     def play(self, move: str):
         # We are making a move and we check if the move is valid and if the king is in check after the move
+        # We'll see if we decide not to do the simulation again in the play funtion
 
-        self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
-        self.king_available_moves = game.King_available_moves(
-            self.board, self.color, self.king_attacked_moves
-        )
-        king_in_check_before_play = game.is_king_in_check(
-            board=self.board,
-            color=self.color,
-            king_attacked_moves=self.king_attacked_moves,
-        )
-        all_legal_moves = self.get_all_legal_moves(self.board, self.color)
-        blocking_moves = self.get_checks_blocking_moves(self.board, self.color)
-        #print("blocking moves:", blocking_moves)
+        if self.king_in_check:
+            print("Your king is in check, you must play a move that gets your king out of check")
 
-        if king_in_check_before_play:
-            if blocking_moves == []:
-                print("You are in checkmate")
-                self.king_in_checkmate = True
-                return True
-            print(
-                "Your king is in check, you must play a move that gets your king out of check"
-            )
-
-            
-            self.king_in_check = True
-            simulation_king_in_check = self.test_play(move)
-            if not simulation_king_in_check:
-                return False
-        elif not king_in_check_before_play:
-            if all_legal_moves == []:
-                self.in_stalemate = True
-                return True
+        #Start the simulation with the corresponding piece
         simulation_ok = self.test_play(move)
         if not simulation_ok:
+            print("Something went wrong whnn you played you move")
             return False
-
-        # print("Simulation ok:", simulation_ok)
-        self.king_attacked_moves = game.King_attacked_moves(
-            self.simulation_board, self.color
-        )
-        self.king_available_moves = game.King_available_moves(
-            self.simulation_board, self.color, self.king_attacked_moves
-        )
-
-        king_in_check = game.is_king_in_check(
-            board=self.simulation_board,
-            color=self.color,
-            king_attacked_moves=self.king_attacked_moves,
-        )
+        self.king_attacked_squares = game.King_attacked_moves(self.simulation_board, self.color)
+        self.king_available_moves = game.King_available_moves(self.simulation_board, self.color, self.king_attacked_squares)
+        king_in_check = game.is_king_in_check(self.simulation_board, self.color, self.king_attacked_squares)
 
         if not king_in_check:
             # Apply the move to the actual board since it's valid and doesn't put the king in check.
-            # print("King is not in check")
             self.king_in_check = False
             # deepcopy is not working so we have to copy the board manually
             for i in range(len(self.board)):
