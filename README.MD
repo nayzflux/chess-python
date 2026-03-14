@@ -12,6 +12,7 @@ The first version will be a chess game in the terminal between two players
 - Checkmate implementation --> (Done)
 - Stalemate if no move available --> (Done)
 - Stalemate if 3 repetition --> (Done)
+- refactor the code --> (In progress)
+- Pawn promotion
 - We will see if we'll add the 50 moves rule
-- refactor the code
 - Build UI using tkinter
