@@ -1,5 +1,3 @@
-
-
 from color import Color
 from game import play_round
 from pawn import Pawn
@@ -51,6 +49,18 @@ test_check_board = [
     [Pawn(PawnType.TOUR, Color.BLANC), None, None, None, Pawn(PawnType.ROI, Color.BLANC), None, None, Pawn(PawnType.TOUR, Color.BLANC)],
 
 ]
+
+
+test_stalemate_board = [
+    [Pawn(PawnType.ROI, Color.NOIR), None, None, None, None, None, None, None],  # r0  roi noir en a0
+    [None, None, None, Pawn(PawnType.DAME, Color.BLANC), None, None, None, None], # r1  dame blanche en c1
+    [None, Pawn(PawnType.ROI, Color.BLANC), None, None, None, None, None, None],  # r2  roi blanc en b2
+    [None, None, None, None, None, None, None, None],
+    [None, None, None, None, None, None, None, None],
+    [None, None, None, None, None, None, None, None],
+    [None, None, None, None, None, None, None, None],
+    [None, None, None, None, None, None, None, None],
+]
 def init_board():
     board = [
         [Pawn(PawnType.TOUR, Color.NOIR), Pawn(PawnType.CAVALIER, Color.NOIR), Pawn(PawnType.FOU, Color.NOIR), Pawn(PawnType.DAME, Color.NOIR), Pawn(PawnType.ROI, Color.NOIR), Pawn(PawnType.FOU, Color.NOIR), Pawn(PawnType.CAVALIER, Color.NOIR), Pawn(PawnType.TOUR, Color.NOIR)],
@@ -69,7 +79,7 @@ def init_board():
 if __name__ == "__main__":
 
     #board = init_board()
-    board = sequence_board
+    board = test_stalemate_board
 
     player_white = Player(board, Color.BLANC)
     player_black = Player(board, Color.NOIR)
@@ -84,6 +94,10 @@ if __name__ == "__main__":
         play_round(board, current_player, opponent, round_count)
         if current_player.king_in_checkmate:
             print(f"Checkmate! {opponent.color.value} wins!")
+            run = False
+            break
+        if current_player.stalemate:
+            print(f"Stalemate! {opponent.color.value} wins!")
             run = False
             break
         round_count += 1

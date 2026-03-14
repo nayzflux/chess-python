@@ -22,6 +22,7 @@ class Player:
         self.color = color
         self.king_in_check = False
         self.king_in_checkmate = False
+        self.stalemate = False
         self.board = board
         self.taken_pieces = []
         self.points = 0
@@ -30,12 +31,12 @@ class Player:
         self.king_attacked_moves = []
    
 
-    def look_if_king_in_checkmate(self):
+    def look_if_king_in_checkmate_or_stalemate(self):
         self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
         self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_moves)
         king_in_check_before_play = game.is_king_in_check(board = self.board, color = self.color, king_attacked_moves=self.king_attacked_moves)
         all_legal_moves = self.get_all_legal_moves(self.board, self.color)
-        
+        print("All stalemate moves:", all_legal_moves)
 
         if king_in_check_before_play:
             blocking_moves = self.get_checks_blocking_moves(self.board, self.color)
@@ -46,6 +47,14 @@ class Player:
                 self.king_in_checkmate = True
                 return True
 
+
+        if not king_in_check_before_play:
+            if all_legal_moves == []:
+                print("Stalemate! No legal moves available.")
+                self.has_win = True
+                self.stalemate = True
+                return True
+            
     def play(self, move : str):
         #We are making a move and we check if the move is valid and if the king is in check after the move
 
@@ -69,7 +78,13 @@ class Player:
             if not simulation_king_in_check:
                 return False
             
-        
+        if not king_in_check_before_play:
+            if all_legal_moves == []:
+                print("Stalemate! No legal moves available.")
+                self.has_win = True
+                self.stalemate = True
+                return True
+            
         simulation_ok = self.test_play(move)
         if not simulation_ok:
             return False
@@ -274,7 +289,12 @@ class Player:
         print("Annotated moves:", annotated_moves)
         for move in annotated_moves:
             if self.test_play(move):
-                legal_moves.append(move)
+                
+                self.king_attacked_moves = game.King_attacked_moves(self.simulation_board, self.color)
+                if game.is_king_in_check(board = self.simulation_board, color = self.color, king_attacked_moves=self.king_attacked_moves):
+                    pass
+                else:
+                    legal_moves.append(move)
         return legal_moves
     
     def get_checks_blocking_moves(self, board, color):
@@ -283,6 +303,7 @@ class Player:
         for move in annotated_moves:
             if self.test_play(move):
                 self.king_attacked_moves = game.King_attacked_moves(self.simulation_board, self.color)
+                self.king_available_moves = game.King_available_moves(self.simulation_board, self.color, self.king_attacked_moves)
                 if not game.is_king_in_check(board = self.simulation_board, color = self.color, king_attacked_moves=self.king_attacked_moves):
                     blocking_moves.append(move)
         return blocking_moves
