@@ -6,13 +6,17 @@ from pawn_type import PawnType
 
 def play_round(board, player, opponent, round_count):
 
-    player.look_if_king_in_checkmate()
 
+    player.look_if_king_in_checkmate_or_stalemate()
+    display_board(board, player.king_attacked_moves)
     if player.king_in_checkmate:
+        print(player.color)
         print(f"Checkmate! {opponent.color.value} wins!")
         success = True
+    elif player.in_stalemate:
+        print(f"It's a draw ! {player.color.value} has no move!")
+        success = True
     else:
-        display_board(board, player.king_attacked_moves)
 
         if player.color == Color.BLANC:
             display_points(player, opponent)

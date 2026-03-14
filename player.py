@@ -1,39 +1,18 @@
-import re
-
-import game
 from color import Color
+import re
 from pawn import Pawn
+import game
 from pawn_type import PawnType
+import copy
 
 board_square = {
     # Files
-    "a": 0,
-    "b": 1,
-    "c": 2,
-    "d": 3,
-    "e": 4,
-    "f": 5,
-    "g": 6,
-    "h": 7,
-    "A": 0,
-    "B": 1,
-    "C": 2,
-    "D": 3,
-    "E": 4,
-    "F": 5,
-    "G": 6,
-    "H": 7,
-    # Lines
-    "1": 7,
-    "2": 6,
-    "3": 5,
-    "4": 4,
-    "5": 3,
-    "6": 2,
-    "7": 1,
-    "8": 0,
-}
+    "a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7,
+    "A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7,
 
+    # Lines
+    "1": 7, "2": 6, "3": 5, "4": 4,"5": 3, "6": 2, "7": 1, "8": 0
+}
 
 class Player:
     def __init__(self, board, color: Color):
@@ -43,6 +22,7 @@ class Player:
         self.color = color
         self.king_in_check = False
         self.king_in_checkmate = False
+        self.in_stalemate = False
         self.board = board
         self.taken_pieces = []
         self.points = 0
@@ -50,25 +30,24 @@ class Player:
         self.king_available_moves = []
         self.king_attacked_moves = []
 
-    def look_if_king_in_checkmate(self):
+    def look_if_king_in_checkmate_or_stalemate(self):
         self.king_attacked_moves = game.King_attacked_moves(self.board, self.color)
-        self.king_available_moves = game.King_available_moves(
-            self.board, self.color, self.king_attacked_moves
-        )
-        king_in_check_before_play = game.is_king_in_check(
-            board=self.board,
-            color=self.color,
-            king_attacked_moves=self.king_attacked_moves,
+        self.king_available_moves = game.King_available_moves(self.board, self.color, self.king_attacked_moves)
+        king_in_check_before_play = game.is_king_in_check(board=self.board,color=self.color,king_attacked_moves=self.king_attacked_moves,
         )
         all_legal_moves = self.get_all_legal_moves(self.board, self.color)
 
         if king_in_check_before_play:
             blocking_moves = self.get_checks_blocking_moves(self.board, self.color)
-            # print("All legal moves:", blocking_moves)
+            #print("All legal moves:", blocking_moves)
             if blocking_moves == []:
                 print("You are in checkmate")
 
                 self.king_in_checkmate = True
+                return True
+        elif not king_in_check_before_play:
+            if all_legal_moves == []:
+                self.in_stalemate = True
                 return True
 
     def play(self, move: str):
@@ -85,10 +64,10 @@ class Player:
         )
         all_legal_moves = self.get_all_legal_moves(self.board, self.color)
         blocking_moves = self.get_checks_blocking_moves(self.board, self.color)
-        # print("blocking moves:", blocking_moves)
+        #print("blocking moves:", blocking_moves)
 
         if king_in_check_before_play:
-            if move not in blocking_moves:
+            if blocking_moves == []:
                 print("You are in checkmate")
                 self.king_in_checkmate = True
                 return True
@@ -96,11 +75,15 @@ class Player:
                 "Your king is in check, you must play a move that gets your king out of check"
             )
 
+            
             self.king_in_check = True
             simulation_king_in_check = self.test_play(move)
             if not simulation_king_in_check:
                 return False
-
+        elif not king_in_check_before_play:
+            if all_legal_moves == []:
+                self.in_stalemate = True
+                return True
         simulation_ok = self.test_play(move)
         if not simulation_ok:
             return False

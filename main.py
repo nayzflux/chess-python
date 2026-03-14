@@ -19,6 +19,18 @@ test_rock_board = [
     [Pawn(PawnType.TOUR, Color.BLANC), None, None, None, Pawn(PawnType.ROI, Color.BLANC), None, None, Pawn(PawnType.TOUR, Color.BLANC)],
 ]
 
+test_stalemate = [
+    [Pawn(PawnType.ROI, Color.NOIR), None, None, None, None, None, None, None],
+    [None, None, None, Pawn(PawnType.DAME, Color.BLANC), None, None, None, None],
+    [Pawn(PawnType.ROI, Color.BLANC), *[None for _ in range(7)]],
+    [None for _ in range(8)],
+    [None for _ in range(8)],
+    [None for _ in range(8)],
+    [None for _ in range(8)],
+    [None for _ in range(8)],
+]
+
+
 sequence_board = [
     [None, None, None, None, Pawn(PawnType.ROI, Color.NOIR), None, None, None],
     [None, None, None, Pawn(PawnType.PION, Color.NOIR), Pawn(PawnType.PION, Color.NOIR), Pawn(PawnType.PION, Color.NOIR), None, None],
@@ -68,7 +80,7 @@ def init_board():
 
 if __name__ == "__main__":
     # board = init_board()
-    board = sequence_board
+    board = test_stalemate
 
     player_white = Player(board, Color.BLANC)
     player_black = Player(board, Color.NOIR)
@@ -91,10 +103,14 @@ if __name__ == "__main__":
             break
 
         play_round(board, current_player, opponent, round_count)
+        
         if current_player.king_in_checkmate:
             print(f"Checkmate! {opponent.color.value} wins!")
             run = False
             break
+        if current_player.in_stalemate:
+            print(f"It's a draw ! {current_player.color.value} has no move!")
+            run = False
         round_count += 1
         current_player = (
             player_black if current_player.color == Color.BLANC else player_white
